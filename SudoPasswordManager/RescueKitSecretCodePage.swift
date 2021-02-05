@@ -21,13 +21,14 @@ class RescueKitSecretCodePage: PDFPage {
         context.scaleBy(x: 1.0, y: -1.0)
         
         let string: NSString = RescueKitSecretCodePage.code
-        let font = UIFont(name: "Courier-Bold", size: 20)
+        let fontSize: CGFloat = 18
+        let font = UIFont(name: "Courier-Bold", size: fontSize) ?? UIFont.boldSystemFont(ofSize: fontSize)
         let attributes = [
             NSAttributedString.Key.foregroundColor: UIColor.black,
-            NSAttributedString.Key.font: font ?? UIFont.boldSystemFont(ofSize: 20)
+            NSAttributedString.Key.font: font
         ]
         let stringSize = string.size(withAttributes: attributes)
-        string.draw(at: CGPoint(x: (pageBounds.size.width - stringSize.width) / 2, y: (pageBounds.size.height - (pageBounds.size.height / 4.6))), withAttributes: attributes)
+        string.draw(at: CGPoint(x: (pageBounds.size.width - stringSize.width) / 2, y: (pageBounds.size.height - (pageBounds.size.height / 4.75))), withAttributes: attributes)
         
         context.restoreGState()
         UIGraphicsPopContext()

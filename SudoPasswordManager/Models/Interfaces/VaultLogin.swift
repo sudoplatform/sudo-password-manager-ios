@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// Represented the full set of credentials for a service.
+/// Represents the details for a login.
 public class VaultLogin: VaultItem {
 
     /// Username for the servivce

@@ -38,7 +38,24 @@ protocol PasswordClientService {
     func getOwnershipProof(sudoId: String, completion: @escaping (Swift.Result<String, Error>) -> Void)
 }
 
-public class DefaultPasswordManagerClient: PasswordManagerClient {
+/// Concrete PasswordManagerClient instance. This is the entry point into the PasswordManager SDK.
+public class DefaultSudoPasswordManagerClient: SudoPasswordManagerClient {
+
+    /// Creates a `PasswordManager`.
+    /// - Parameters:
+    ///   - userClient: The application's `SudoUserClient` instance
+    ///   - profilesClient: The application's `SudoProfilesClient` instance
+    ///   - entitlementsClient: The application's `SudoEntitlementsClient` instance
+    ///   - vaultClient: The application's `SudoSecureVaultClient` instance, optional.  Password manager client will create a SudoSecureVaultClient.
+    /// - Throws: If an error occurred setting up SDK dependencies.
+    public init(userClient: SudoUserClient, profilesClient: SudoProfilesClient, entitlementsClient: SudoEntitlementsClient, vaultClient: SudoSecureVaultClient? = nil) throws {
+        let secureVaultClient = try (vaultClient ?? DefaultSudoSecureVaultClient(sudoUserClient: userClient))
+        self.service = DefaultPasswordClientService(client: secureVaultClient, sudoUserClient: userClient, sudoProfilesClient: profilesClient, entitlementsClient: entitlementsClient)
+    }
+
+    init(service: PasswordClientService) {
+        self.service = service
+    }
 
     // Handles all the service dependencies which needs to be passed in.
     let service: PasswordClientService
@@ -54,14 +71,6 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
     lazy var vaultFactory: VaultFactory = {
         return VaultFactory(client: self, keyManager: self.service.keyManager)
     }()
-
-    var rescueKitGenerator: RescueKitGenerator {
-        return RescueKitGenerator()
-    }
-    
-    init(service: PasswordClientService) {
-        self.service = service
-    }
 
     // MARK: Registration / Unlocking
 
@@ -472,21 +481,31 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
             completion(.failure(PasswordManagerError.vaultLocked))
             return
         }
-        
-        guard let login = item as? VaultLogin else {
-            completion(.failure(PasswordManagerError.invalidFormat))
-            return
-        }
 
         do {
-            let loginProxy = try self.vaultFactory.createVaultLoginProxy(from: login, vaultKey: vaultKey)
-            try self.vaultStore.add(login: loginProxy, toVaultWithId: vault.id)
+            var itemId: String? = nil
+            if let login = item as? VaultLogin {
+                let loginProxy = try self.vaultFactory.createVaultLoginProxy(from: login, vaultKey: vaultKey)
+                try self.vaultStore.add(login: loginProxy, toVaultWithId: vault.id)
+                itemId = loginProxy.id
+            } else if let creditCard = item as? VaultCreditCard {
+                let creditCardProxy = try self.vaultFactory.createVaultCreditCardProxy(from: creditCard, vaultKey: vaultKey)
+                try self.vaultStore.add(creditCard: creditCardProxy, toVaultWithId: vault.id)
+                itemId = creditCardProxy.id
+            } else if let bankAccount = item as? VaultBankAccount {
+                let bankAccountProxy = try self.vaultFactory.createVaultBankAccountProxy(from: bankAccount, vaultKey: vaultKey)
+                try self.vaultStore.add(bankAccount: bankAccountProxy, toVaultWithId: vault.id)
+                itemId = bankAccountProxy.id
+            } else {
+                completion(.failure(PasswordManagerError.invalidFormat))
+                return
+            }
 
             // Update vault with the service.
             self.update(vault: vault) { (updateResult) in
                 switch updateResult {
                 case .success:
-                    completion(.success(loginProxy.id))
+                    completion(.success(itemId ?? ""))
                 case .failure(let error):
                     completion(.failure(error))
                 }
@@ -513,17 +532,26 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
         }
 
         // Create a window into the internal data to return to the client.
-        let vaultItems = internalVault.vaultData.login.map {
+        let loginItems = internalVault.vaultData.login.map {
             return self.vaultFactory.createVaultLogin(from: $0, revealKey: vaultKey)
         }
-        completion(.success(vaultItems))
+
+        let creditCardItems = internalVault.vaultData.creditCard.map {
+            return self.vaultFactory.createVaultCreditCard(from: $0, revealKey: vaultKey)
+        }
+
+        let bankAccountItems = internalVault.vaultData.bankAccount.map {
+            return self.vaultFactory.createVaultBankAccount(from: $0, revealKey: vaultKey)
+        }
+
+        completion(.success(loginItems + creditCardItems + bankAccountItems))
     }
 
     public func getVaultItem(id: String, in vault: Vault, completion: @escaping (Result<VaultItem?, Error>) -> Void) {
         guard self.isLocked() == false else { completion(.failure(PasswordManagerError.vaultLocked)); return }
 
         // Get the internal data from the store
-        guard let internalVault = self.vaultStore.getVault(withId: vault.id), let item = internalVault.vaultData.login.first(where: { $0.id == id }) else {
+        guard let internalVault = self.vaultStore.getVault(withId: vault.id) else {
             completion(.success(nil))
             return
         }
@@ -534,7 +562,15 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
             return
         }
 
-        completion(.success(self.vaultFactory.createVaultLogin(from: item, revealKey: vaultKey)))
+        if let item = internalVault.vaultData.login.first(where: { $0.id == id }) {
+            completion(.success(self.vaultFactory.createVaultLogin(from: item, revealKey: vaultKey)))
+        } else if let item = internalVault.vaultData.creditCard.first(where: { $0.id == id }) {
+            completion(.success(self.vaultFactory.createVaultCreditCard(from: item, revealKey: vaultKey)))
+        } else if let item = internalVault.vaultData.bankAccount.first(where: { $0.id == id }) {
+            completion(.success(self.vaultFactory.createVaultBankAccount(from: item, revealKey: vaultKey)))
+        } else {
+            completion(.success(nil))
+        }
     }
 
     public func update(item: VaultItem, in vault: Vault, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -545,17 +581,22 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
             completion(.failure(PasswordManagerError.vaultLocked))
             return
         }
-        
-        guard let login = item as? VaultLogin else {
-            completion(.failure(PasswordManagerError.invalidFormat))
-            return
-        }
 
-        // Convert the `VaultLogin` to our vault store format
         do {
-            let proxy = try self.vaultFactory.createVaultLoginProxy(from: login, vaultKey: vaultKey)
-            try self.vaultStore.update(login: proxy, in: vault.id)
-
+            if let login = item as? VaultLogin {
+                // Convert the `VaultLogin` to our vault store format
+                let proxy = try self.vaultFactory.createVaultLoginProxy(from: login, vaultKey: vaultKey)
+                try self.vaultStore.update(login: proxy, in: vault.id)
+            } else if let creditCard = item as? VaultCreditCard {
+                let proxy = try self.vaultFactory.createVaultCreditCardProxy(from: creditCard, vaultKey: vaultKey)
+                try self.vaultStore.update(creditCard: proxy, in: vault.id)
+            } else if let bankAccount = item as? VaultBankAccount {
+                let proxy = try self.vaultFactory.createVaultBankAccountProxy(from: bankAccount, vaultKey: vaultKey)
+                try self.vaultStore.update(bankAccount: proxy, in: vault.id)
+            } else {
+                completion(.failure(PasswordManagerError.invalidFormat))
+                return
+            }
             // Update the vault with the service.
             self.update(vault: vault, completion: completion)
         } catch {
@@ -567,7 +608,7 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
         guard self.isLocked() == false else { completion(.failure(PasswordManagerError.vaultLocked)); return }
 
         do {
-            try self.vaultStore.removeVaultLogin(withId: id, vaultId: vault.id)
+            try self.vaultStore.removeVaultItem(withId: id, vaultId: vault.id)
 
             // update the vault with the service
             self.update(vault: vault, completion: completion)
@@ -575,18 +616,33 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
             completion(.failure(PasswordManagerError.invalidVault))
         }
     }
-    
+
     // MARK: - Rescue Kit
-    
+
     public func renderRescueKit() -> PDFDocument? {
-        if let code = getSecretCode() {
-            return rescueKitGenerator.generatePDF(with: code)
-        }
-        return nil
+        guard let code = getSecretCode() else { return nil }
+        return RescueKitGenerator()?.generatePDF(with: code)
     }
-    
-    // MARK: - Entitlement State
-    
+
+    public func renderRescueKit(templatePDF: PDFDocument) -> PDFDocument? {
+        guard let code = getSecretCode() else { return nil }
+        return RescueKitGenerator(template: templatePDF)?.generatePDF(with: code)
+    }
+
+    // MARK: - Entitlements
+
+    public func getEntitlement(completion: @escaping (Result<[Entitlement], Error>) -> Void) {
+        self.service.entitlementsClient.getEntitlements { (result) in
+            switch result {
+            case .success(let set):
+                let maxVaultsPerSudo = Entitlement(name: .maxVaultPerSudo, limit: set?.maxVaultsPerSudo?.value ?? 0)
+                completion(.success([maxVaultsPerSudo]))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
     public func getEntitlementState(completion: @escaping (Result<[EntitlementState], Error>) -> Void) {
         DispatchQueue.init(label: "Entitlements").async {
             do {
@@ -596,12 +652,12 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
 
                 // Get entitlements
                 group.enter()
-                var entitlementsList: [SudoEntitlements.Entitlement] = []
+                var entitlementSet: SudoEntitlements.EntitlementsSet?
                 var serviceError: Error?
                 self.service.entitlementsClient.getEntitlements(completion: { (result) in
                     switch result {
                     case .success(let set):
-                        entitlementsList = set?.entitlements ?? []
+                        entitlementSet = set
                     case .failure(let error):
                         serviceError = error
                     }
@@ -641,7 +697,7 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
                     return
                 }
 
-                let states = self.calculateEntitlementStates(sudos: sudoList, entitlements: entitlementsList, vaultMetadata: vaultMetadata)
+                let states = self.calculateEntitlementStates(sudos: sudoList, entitlementSet: entitlementSet, vaultMetadata: vaultMetadata)
                 completion(.success(states))
             } catch {
                 completion(.failure(PasswordManagerError(type: .secureVaultService, underlyingError: error, userInfo: nil)))
@@ -649,9 +705,11 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
         }
     }
 
-    func calculateEntitlementStates(sudos: [Sudo], entitlements: [SudoEntitlements.Entitlement], vaultMetadata: [VaultMetadata]) -> [EntitlementState] {
 
-        guard let maxVaultsPerSudoEntitlement = entitlements.first(where: { $0.name == "sudoplatform.vault.vaultMaxPerSudo" }) else {
+
+    func calculateEntitlementStates(sudos: [Sudo], entitlementSet: SudoEntitlements.EntitlementsSet?, vaultMetadata: [VaultMetadata]) -> [EntitlementState] {
+
+        guard let maxVaultsPerSudoEntitlement = entitlementSet?.maxVaultsPerSudo else {
             return []
         }
 
@@ -676,5 +734,11 @@ public class DefaultPasswordManagerClient: PasswordManagerClient {
 extension VaultMetadata {
     var sudoId: String? {
         return self.owners.first(where: {$0.issuer == "sudoplatform.sudoservice"})?.id
+    }
+}
+
+extension EntitlementsSet {
+    var maxVaultsPerSudo: SudoEntitlements.Entitlement? {
+        return entitlements.first(where: { $0.name == Entitlement.Name.maxVaultPerSudo.rawValue })
     }
 }

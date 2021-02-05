@@ -8,32 +8,38 @@ import Foundation
 import PDFKit
 
 class RescueKitGenerator: NSObject, PDFDocumentDelegate {
+
+    let template: PDFDocument
+
+    /// Creates a rescue kit generator
+    /// - Parameter template: The optional template pdf to use. If nil the default from the bundle will be used.
+    init?(template: PDFDocument? = nil) {
+        if let template = template {
+            self.template = template
+        }
+        else {
+            let bundle = Bundle(for: Self.classForCoder())
+            guard let bundleUrl = bundle.url(forResource: "RescueKit", withExtension: "pdf"), let template = PDFDocument(url: bundleUrl) else {
+                return nil
+            }
+            self.template = template
+        }
+    }
+
     /// Generates a PDF containing the secret code.
     /// - Parameters:
     ///   - code: The secret code belonging to the user.
-    /// - Returns: A PDFDocument if successful, or nil if unable to find the PDF file.
-    public func generatePDF(with code: String) -> PDFDocument? {
-        if let document = loadDocument() {
-            document.delegate = self
-            if let page = document.page(at: 0), let codePage = page as? RescueKitSecretCodePage {
-                codePage.set(code)
-            }
-            return document
+    /// - Returns: A PDFDocument with the secret code added.
+    func generatePDF(with code: String) -> PDFDocument {
+        template.delegate = self
+        if let page = template.page(at: 0), let codePage = page as? RescueKitSecretCodePage {
+            codePage.set(code)
         }
-        return nil
+        return template
     }
     
     // Implementation from the PDFDocumentDelegate
     func classForPage() -> AnyClass {
         return RescueKitSecretCodePage.self
-    }
-    
-    // Loads the document from the Bundle
-    private func loadDocument() -> PDFDocument? {
-        let bundle = Bundle(for: self.classForCoder)
-        if let bundleUrl = bundle.url(forResource: "RescueKit", withExtension: "pdf") {
-                return PDFDocument(url: bundleUrl)
-        }
-        return nil
     }
 }

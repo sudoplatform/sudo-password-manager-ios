@@ -13,59 +13,59 @@ import SudoEntitlements
 import SudoProfiles
 
 class PasswordManagerClientTests: XCTestCase {
-
+    
     var secureVaultClient: MyMockSudoSecureVaultClient!
     var service: PasswordClientServiceMock!
-    var client: DefaultPasswordManagerClient!
+    var client: DefaultSudoPasswordManagerClient!
     var userClientMock: MockSudoUserClient!
     var keyManager: MockPasswordManagerKeyManager!
     var entitlements: MockSudoEntitlementsClient!
     var sudoProfilesclient: MockSudoProfilesClient!
     
     var secretCode: String = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-
+    
     override func setUpWithError() throws {
         self.secureVaultClient = MyMockSudoSecureVaultClient()
         self.userClientMock = MockSudoUserClient()
-
+        
         self.keyManager = MockPasswordManagerKeyManager()
-
+        
         self.entitlements = MockSudoEntitlementsClient()
-
+        
         self.sudoProfilesclient = MockSudoProfilesClient()
-
+        
         self.service = PasswordClientServiceMock(client: self.secureVaultClient, sudoUserClient: self.userClientMock, keyManager: keyManager, entitlementsClient: self.entitlements, sudoProfilesClient: self.sudoProfilesclient)
-        self.client = DefaultPasswordManagerClient(service: self.service)
-
+        self.client = DefaultSudoPasswordManagerClient(service: self.service)
+        
         self.service.userSubject = UUID().uuidString
     }
-
+    
     func useKeychain() {
         let km = DefaultPasswordManagerKeyManager(userClient: self.userClientMock)
         try? km.removeAllKeys()
         self.service.keyManager = km
     }
-
+    
     func setUsername(_ name: String) {
         self.userClientMock.getUserNameReturn = name
     }
-
+    
     /// Tests all valid combinations of success/failure that `getRegistrationStatus` returns.
     func testGetRegistrationStatus() throws {
         self.secureVaultClient.isRegisteredResult = .success(false)
-
+        
         // Test client not registered
         XCTAssertEqual(try? awaitResult { self.client.getRegistrationStatus(completion: $0) }.get(), .notRegistered)
-
+        
         // Test client is registered but no secret key found
         self.secureVaultClient.isRegisteredResult = .success(true)
         XCTAssertEqual(try? awaitResult { self.client.getRegistrationStatus(completion: $0) }.get(), .missingSecretCode)
-
+        
         // Test client is registered and secret key found
         self.secureVaultClient.isRegisteredResult = .success(true)
         self.keyManager.getKeyDerivingKeyResult = Data()
         XCTAssertEqual(try? awaitResult { self.client.getRegistrationStatus(completion: $0) }.get(), .registered)
-
+        
         // Test client is registered and get secret key returns error
         self.secureVaultClient.isRegisteredResult = .success(true)
         self.keyManager.getKeyDerivingKeyError = NSError.some
@@ -75,7 +75,7 @@ class PasswordManagerClientTests: XCTestCase {
         else {
             XCTFail("Expected getRegistrationStatus to return failure, but returned success instead.")
         }
-
+        
         // Test that errors returned by the secure vault service are propagated.
         self.secureVaultClient.isRegisteredResult = .failure(NSError.some)
         XCTAssertThrowsError(try awaitResult({ self.client.getRegistrationStatus(completion: $0) }).get())
@@ -85,9 +85,9 @@ class PasswordManagerClientTests: XCTestCase {
     func testKeyDerivingKeySavedDuringRegisterSuccess() {
         let expectation = self.expectation(description: "")
         let masterPassword = "Password"
-
+        
         self.secureVaultClient.registerResult = .success("")
-
+        
         let key = Data(repeating: 1, count: 8)
         self.keyManager.generateKeyDerivingKeyResult = key
         self.client.register(masterPassword: masterPassword) { (result) in
@@ -103,7 +103,7 @@ class PasswordManagerClientTests: XCTestCase {
         }
         self.waitForExpectations(timeout: 5, handler: nil)
     }
-
+    
     /// Tests that the key generated during create is saved even if registration appears to fail.
     /// Also ensures registration failure from client is propagated up.
     func testKeyDerivingKeySavedDuringRegisterFailure() {
@@ -122,23 +122,23 @@ class PasswordManagerClientTests: XCTestCase {
                 case .failure:
                     break
                 }
-
+                
                 // Test the correct key and password were passed to regsiter
                 guard let registerParamKey = self.secureVaultClient.registerParamKey,
-                    let registerParamPassword = self.secureVaultClient.registerParamPassword else {
+                      let registerParamPassword = self.secureVaultClient.registerParamPassword else {
                     XCTFail("Missing registartion parameters passed to secure vault client")
                     return
                 }
-
+                
                 XCTAssertEqual(registerParamKey, key)
                 XCTAssertEqual(registerParamPassword, masterPassword.data(using: .utf8))
-
+                
                 expectation.fulfill()
             }
             self.waitForExpectations(timeout: 5, handler: nil)
         }
     }
-
+    
     func testKdkGenerateFailureIsReturned() {
         // set register to return success
         self.secureVaultClient.registerResult = .success("")
@@ -148,12 +148,12 @@ class PasswordManagerClientTests: XCTestCase {
         let result = awaitResult({self.client.register(masterPassword: "", completion: $0)})
         XCTAssertThrowsError(try result.get(), "") { (resultError) in
             guard let internalError = (resultError as? PasswordManagerError) else { XCTFail(); return }
-
+            
             XCTAssertEqual(internalError.type, PasswordManagerError.ErrorType.secureVaultService)
             XCTAssertEqual((internalError.underlyingError as NSError?), error)
         }
     }
-
+    
     func testSetKeyDerivingKeyFrailsOnRegistration() {
         // set register to return success
         self.secureVaultClient.registerResult = .success("")
@@ -164,135 +164,135 @@ class PasswordManagerClientTests: XCTestCase {
         let result = awaitResult({self.client.register(masterPassword: "", completion: $0)})
         XCTAssertThrowsError(try result.get(), "") { (resultError) in
             guard let internalError = (resultError as? PasswordManagerError) else { XCTFail(); return }
-
+            
             XCTAssertEqual(internalError.type, PasswordManagerError.ErrorType.secureVaultService)
             XCTAssertEqual((internalError.underlyingError as NSError?), error)
         }
     }
-
+    
     // MARK: Lock/Unlock
-
+    
     func testVaultUnlockFailsMissingSecretCode() {
         XCTAssertTrue(self.client.isLocked())
-
+        
         let result = awaitResult({self.client.unlock(masterPassword: "Foo", secretCode: nil, completion: $0)})
         XCTAssertThrowsError(try result.get(), "") { (resultError) in
             XCTAssertEqual((resultError as? PasswordManagerError)?.type, PasswordManagerError.ErrorType.invalidPasswordOrMissingSecretCode)
         }
     }
-
+    
     func testVaultUnlockSucceedsWithCachedKDK() {
         XCTAssertTrue(self.client.isLocked())
-
+        
         self.keyManager.getKeyDerivingKeyResult = KeyDerivingKey.withUUID
-
+        
         let result = awaitResult({self.client.unlock(masterPassword: "Foo", secretCode: nil, completion: $0)})
         XCTAssertNoThrow(try result.get())
     }
-
+    
     func testVaultUnlockSucceedsWithProvidedSecretKey() {
         XCTAssertTrue(self.client.isLocked())
-
+        
         let result = awaitResult({self.client.unlock(masterPassword: "Foo", secretCode: self.secretCode, completion: $0)})
         XCTAssertNoThrow(try result.get())
-
+        
         guard let addedKey = self.keyManager.setKeyDerivingKeyParamKey else {
             XCTFail()
             return
         }
-
+        
         XCTAssertEqual(addedKey.hexString, self.secretCode)
     }
-
+    
     func testVaultUnlockSucceedsWithCachedAndProvidedKDK() {
         XCTAssertTrue(self.client.isLocked())
-
+        
         self.keyManager.getKeyDerivingKeyResult = KeyDerivingKey.withUUID
         let result = awaitResult({self.client.unlock(masterPassword: "Foo", secretCode: "Bar", completion: $0)})
         XCTAssertNoThrow(try result.get())
     }
-
+    
     func testUnlockFailsIfListFails() {
         XCTAssertTrue(self.client.isLocked())
-
+        
         self.keyManager.getKeyDerivingKeyResult = KeyDerivingKey.withUUID
-
+        
         self.secureVaultClient.listVaultsResult = .failure(SudoSecureVaultClientError.notAuthorized)
-
+        
         let result = awaitResult({self.client.unlock(masterPassword: "Foo", secretCode: nil, completion: $0)})
         XCTAssertThrowsError(try result.get(), "") { (resultError) in
             XCTAssertEqual((resultError as? PasswordManagerError)?.type, PasswordManagerError.ErrorType.secureVaultService)
             XCTAssertEqual((resultError as? PasswordManagerError)?.underlyingError?.localizedDescription, SudoSecureVaultClientError.notAuthorized.localizedDescription)
         }
     }
-
+    
     func testVaultLocksWhenUserChanges() {
         self.useKeychain()
         self.setUsername("Foo")
-
+        
         XCTAssertEqual(self.client.isLocked(), true)
         self.unlockVault()
         XCTAssertEqual(self.client.isLocked(), false)
         self.userClientMock.getUserNameReturn = "E.T."
         XCTAssertEqual(self.client.isLocked(), true)
     }
-
+    
     // MARK: CRUD tests
-
+    
     private func unlockVault() {
         let result = awaitResult({self.client.unlock(masterPassword: "Foo", secretCode: self.secretCode, completion: $0)})
         XCTAssertNoThrow(try result.get())
     }
-
+    
     func testCreateVaultFailsIfLocked() {
         XCTAssertTrue(self.client.isLocked())
-
+        
         let createResult = awaitResult({self.client.createVault(sudoId: "foo", completion: $0)})
         XCTAssertThrowsError(try createResult.get()) { (resultError) in
             XCTAssertTrue(isError(resultError, ofType: .vaultLocked))
         }
     }
-
+    
     func testCreateVaultSucceeds() {
         self.useKeychain()
         self.setUsername("Foo")
-
+        
         XCTAssertTrue(self.client.isLocked())
         self.unlockVault()
-
+        
         // Put some data into the secure vault client mock as the data that will be returned
         let creationDate = Date()
         let vaultMetaData = VaultMetadata(id: "1", owner: "", version: 0, blobFormat: "foo", createdAt: creationDate, updatedAt: creationDate, owners: [])
         self.secureVaultClient.createVaultResult = .success(vaultMetaData)
-
+        
         let ownershipProof = "This city is killing me"
         self.service.getOwnershipProofResult = .success(ownershipProof)
-
+        
         // Create the vault, make sure it doesn't throw any errors on creation
         let createResult = awaitResult({self.client.createVault(sudoId: ownershipProof, completion: $0)})
         XCTAssertNoThrow(try createResult.get())
         guard let vault = try? createResult.get() else { return }
-
+        
         // Check that the vault data we get back from the call is the same data that the secure vault client will return
         XCTAssertEqual(vault.id, vaultMetaData.id)
         XCTAssertEqual(vault.createdAt, vaultMetaData.createdAt)
         XCTAssertEqual(vault.updatedAt, vaultMetaData.updatedAt)
-
+        
         guard let blobFormatParam = self.secureVaultClient.createVaultParamBlobFormat,
               let blobParam = self.secureVaultClient.createVaultParamBlob,
               let ownershipProofParam = self.secureVaultClient.createVaultParamOwnershipProof else {
             XCTFail(); return
         }
-
+        
         // Make sure the vault data we passed to the `create` call is the most recent schema version.
         XCTAssertEqual(blobFormatParam, VaultSchema.latest.rawValue)
-
+        
         guard let _ = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: blobParam) else { XCTFail(); return }
-
+        
         // Check the ownership proof to make sure it made it's way up.
         XCTAssertEqual(ownershipProofParam, ownershipProof)
     }
-
+    
     func testCreateFailsOnErrorFromSecureVaultClient() {
         self.useKeychain()
         self.setUsername("Foo")
@@ -309,39 +309,39 @@ class PasswordManagerClientTests: XCTestCase {
             XCTAssertEqual(resultError as NSError, createVaultError)
         }
     }
-
+    
     func testCreatedVaultCanBeFetched() {
         self.useKeychain()
         self.setUsername("Foo")
-
+        
         XCTAssertTrue(self.client.isLocked())
         self.unlockVault()
         XCTAssertFalse(self.client.isLocked())
-
+        
         // Put some data into the secure vault client mock as the data that will be returned
         let vaultID = "Golden Wings"
         let creationDate = Date()
         let vaultMetaData = VaultMetadata(id: vaultID, owner: "", version: 0, blobFormat: "foo", createdAt: creationDate, updatedAt: creationDate, owners: [])
         self.secureVaultClient.createVaultResult = .success(vaultMetaData)
-
+        
         let ownershipProof = "This city is killing me"
-
+        
         // Create the vault
         _ = awaitResult({self.client.createVault(sudoId: ownershipProof, completion: $0)})
-
+        
         // Make sure that vaults recently created are avilable now
         let fetchResult = awaitResult({self.client.getVault(withId: vaultID, completion: $0) })
         guard case .success(let possibleVault) = fetchResult else {
             XCTFail(); return
         }
-
+        
         // We can now check the vault is what we expect
         XCTAssertNotNil(possibleVault); guard let realVault = possibleVault else { return }
         XCTAssertEqual(realVault.id, vaultID)
     }
-
+    
     // MARK: Get tests
-
+    
     func testGetFailsIfLocked() {
         XCTAssertTrue(self.client.isLocked())
         let createResult = awaitResult({ self.client.getVault(withId: "", completion: $0) })
@@ -349,64 +349,155 @@ class PasswordManagerClientTests: XCTestCase {
             XCTAssertTrue(isError(resultError, ofType: .vaultLocked))
         }
     }
-
+    
     func testGetVaultNoResult() {
         self.useKeychain()
         self.setUsername("Foo")
-
+        
         self.unlockVault()
-
+        
         // Look for a vault that doesn't exist
         let result = awaitResult({ self.client.getVault(withId: "Odd look", completion: $0)})
-
+        
         // First checks for errors, second makes sure result is nil
         XCTAssertNoThrow(try result.get())
         XCTAssertNil(try? result.get())
     }
-
+    
     func testGetVaultSuccess() {
         self.useKeychain()
         self.setUsername("Foo")
-
+        
         self.unlockVault()
-
+        
         // To test vaults exist, we need to populate the secure vault client with some vaults
         let aSecureVault = Vault(id: "Walk on the while side", owner: "", version: 1, blobFormat: "JSON", createdAt: Date(), updatedAt: Date(), owners: [], blob: Data())
         self.secureVaultClient.listVaultsResult = .success([aSecureVault])
-
+        
         // Look for a vault that doesn't exist
         let result = awaitResult({ self.client.getVault(withId: aSecureVault.id, completion: $0)})
-
+        
         // Get the vault from the result
         XCTAssertNoThrow(try result.get())
         guard let vault = try? result.get() else { return }
-
+        
         XCTAssertEqual(vault.id, aSecureVault.id)
         XCTAssertEqual(vault.createdAt, aSecureVault.createdAt)
         XCTAssertEqual(vault.updatedAt, aSecureVault.updatedAt)
     }
-
+    
     func testDeleteVault() {
         _ = self.populateServiceWithKnownVault()
         self.unlockVault()
-
+        
         let listResult = awaitResult({ self.client.listVaults(completion: $0)})
         guard let vault = try? listResult.get().first else { return }
-
+        
         let deleteResult = awaitResult({ self.client.deleteVault(withId: vault.id, completion: $0)})
         XCTAssertNoThrow(try deleteResult.get())
-
+        
         let secondListResult = awaitResult({ self.client.listVaults(completion: $0)})
         guard let emptyList = try? secondListResult.get() else { XCTFail(); return }
-
+        
         XCTAssertEqual(emptyList.count, 0)
     }
-
-    func testChangeMasterPassword() {
-
+    
+    func testAddLoginToUnlockedVault() {
+        self.useKeychain()
+        self.setUsername("Foo")
+        
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        let secureVaultData = tuple.data
+        self.unlockVault()
+        
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+        
+        let newLogin = VaultLogin(id: "Foo", createdAt: Date(), updatedAt: Date(), user: "Foo", url: "bar", name: "Birch", notes: VaultItemNote(value: "Go To Store"), password: VaultItemPassword(value: SecureFieldValue.plainText("SimplePassword"), created: Date(), replaced: Date()), previousPasswords: [])
+        
+        // Save the number of items currently in the vault
+        let vaultItemCountBeforeAdd = secureVaultData.vaultData.login.count
+        
+        self.keyManager.encryptSecureFieldResult = Data(capacity: 10)
+        
+        // Add the item, make sure it doesn't throw an error
+        XCTAssertNoThrow(try awaitResult( {self.client.add(item: newLogin, toVault: vault, completion: $0) }).get() )
+        
+        // Compare the value that gets written to the secure vault service.
+        
+        guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,
+              let paramBlob = self.secureVaultClient.updateVaultParamBlob else {
+            return
+        }
+        
+        XCTAssertEqual(paramBlobFormat, VaultSchema.latest.rawValue)
+        
+        // Decode the blob that was saved to the secure vault service so we can inspect it.
+        guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
+        
+        XCTAssertEqual(decodedBlob.login.count, vaultItemCountBeforeAdd + 1)
+        let newItemIsInVault = decodedBlob.login.contains { (item) -> Bool in
+            return item.user == newLogin.user && item.url == newLogin.url
+        }
+        
+        XCTAssertTrue(newItemIsInVault)
+    }
+    
+    func testAddCreditCardToUnlockedVault() {
+        self.useKeychain()
+        self.setUsername("Foo")
+        
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        let secureVaultData = tuple.data
+        self.unlockVault()
+        
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+        
+        let newCreditCard = VaultCreditCard(id: "Foo",
+                                            createdAt: Date(),
+                                            updatedAt: Date(),
+                                            name: "Bank of Bar",
+                                            notes: VaultItemNote(value: "Secure Bank of Privacy"),
+                                            cardType: "VISA",
+                                            cardName: "Sudo Anonyomous",
+                                            cardExpiration: Date(),
+                                            cardNumber: VaultItemValue(value: "1234123412341234"),
+                                            cardSecurityCode: VaultItemValue(value: "1234"))
+        
+        // Save the number of items currently in the vault
+        let vaultItemCountBeforeAdd = secureVaultData.vaultData.creditCard.count
+        
+        self.keyManager.encryptSecureFieldResult = Data(capacity: 10)
+        
+        // Add the item, make sure it doesn't throw an error
+        XCTAssertNoThrow(try awaitResult( {self.client.add(item: newCreditCard, toVault: vault, completion: $0) }).get() )
+        
+        // Compare the value that gets written to the secure vault service.
+        
+        guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,
+              let paramBlob = self.secureVaultClient.updateVaultParamBlob else {
+            return
+        }
+        
+        XCTAssertEqual(paramBlobFormat, VaultSchema.latest.rawValue)
+        
+        // Decode the blob that was saved to the secure vault service so we can inspect it.
+        guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
+        
+        XCTAssertEqual(decodedBlob.creditCard.count, vaultItemCountBeforeAdd + 1)
+        let newItemIsInVault = decodedBlob.creditCard.contains { (item) -> Bool in
+            return item.cardName == newCreditCard.cardName && item.cardType == newCreditCard.cardType 
+        }
+        
+        XCTAssertTrue(newItemIsInVault)
     }
 
-    func testAddItemToUnlockedVault() {
+    func testAddBankAccountToUnlockedVault() {
         self.useKeychain()
         self.setUsername("Foo")
 
@@ -419,15 +510,28 @@ class PasswordManagerClientTests: XCTestCase {
         // `Vault` is a wrapper of an id, we don't have to fetch for testing
         let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
 
-        let newLogin = VaultLogin(id: "Foo", createdAt: Date(), updatedAt: Date(), user: "Foo", url: "bar", name: "Birch", notes: VaultItemNote(value: "Go To Store"), password: VaultItemPassword(value: SecureFieldValue.plainText("SimplePassword"), created: Date(), replaced: Date()), previousPasswords: [])
+        let newBankAccount = VaultBankAccount(id: "Foo",
+                                              createdAt: Date(),
+                                              updatedAt: Date(),
+                                              name: "Anonyome Account",
+                                              notes: VaultItemNote(value: "Secure Bank of Privacy"),
+                                              accountType: "Savings",
+                                              bankName: "Bank of Anonyome",
+                                              branchAddress: "1111 Anonyomous Lane",
+                                              branchPhone: "111-222-3333",
+                                              ibanNumber: "11-222-333-444",
+                                              routingNumber: "1234123124",
+                                              swiftCode: "123-123-123-123",
+                                              accountNumber: VaultItemValue(value: "1234123412341234"),
+                                              accountPin: VaultItemValue(value: "1234"))
 
         // Save the number of items currently in the vault
-        let vaultItemCountBeforeAdd = secureVaultData.vaultData.login.count
+        let vaultItemCountBeforeAdd = secureVaultData.vaultData.bankAccount.count
 
         self.keyManager.encryptSecureFieldResult = Data(capacity: 10)
 
         // Add the item, make sure it doesn't throw an error
-        XCTAssertNoThrow(try awaitResult( {self.client.add(item: newLogin, toVault: vault, completion: $0) }).get() )
+        XCTAssertNoThrow(try awaitResult( {self.client.add(item: newBankAccount, toVault: vault, completion: $0) }).get() )
 
         // Compare the value that gets written to the secure vault service.
 
@@ -441,32 +545,105 @@ class PasswordManagerClientTests: XCTestCase {
         // Decode the blob that was saved to the secure vault service so we can inspect it.
         guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
 
-        XCTAssertEqual(decodedBlob.login.count, vaultItemCountBeforeAdd + 1)
-        let newItemIsInVault = decodedBlob.login.contains { (item) -> Bool in
-            return item.user == newLogin.user && item.url == newLogin.url
+        XCTAssertEqual(decodedBlob.bankAccount.count, vaultItemCountBeforeAdd + 1)
+        let newItemIsInVault = decodedBlob.bankAccount.contains { (item) -> Bool in
+            return item.bankName == newBankAccount.bankName && item.accountType == newBankAccount.accountType
         }
 
         XCTAssertTrue(newItemIsInVault)
     }
 
-    func testListVaultItems() {
+    func testAddItemToUnlockedVaultUnsupportedType() {
         self.useKeychain()
         self.setUsername("Foo")
 
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        let item = VaultItem(id: "Foo", createdAt: Date(), updatedAt: Date())
+
+        self.keyManager.encryptSecureFieldResult = Data(capacity: 10)
+
+        // Add the item, make sure it doesn't throw an error
+        XCTAssertThrowsError(try awaitResult( {self.client.add(item: item, toVault: vault, completion: $0) }).get())
+    }
+    
+    func testListVaultItems() {
+        self.useKeychain()
+        self.setUsername("Foo")
+        
         let secureVault = self.populateServiceWithKnownVault().vault
         self.unlockVault()
         let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
-
+        
         let result = awaitResult { self.client.listVaultItems(inVault: vault, completion: $0)}
-
+        
         guard let items = try? result.get() else { XCTFail(); return }
-
-        XCTAssertEqual(items.count, 2)
-
+        
+        XCTAssertEqual(items.count, 4)
+        
         // compare indidivual properties.
     }
-
+    
     func testUpdateLogin() {
+        self.useKeychain()
+        self.setUsername("Foo")
+        
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+        
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+        
+        // Get the vault items so we can change one
+        guard let items = try? awaitResult({ self.client.listVaultItems(inVault: vault, completion: $0) }).get() else { XCTFail(); return }
+        
+        guard let update = items.first as? VaultLogin else { XCTFail(); return }
+        
+        // make some updates
+        update.user = "Squirt"
+        update.url = "keyboard.com"
+        update.password = VaultItemPassword(value: "ThisCan'tGoOn")
+        update.notes = VaultItemNote(value: "Hair Salon, Milk, Cookies, Vacation")
+        
+        // Save the `updated` property so we can make sure it changes
+        let updatedAt = update.updatedAt
+        
+        // Save the updates to the password manager
+        XCTAssertNoThrow(try awaitResult({ self.client.update(item: update, in: vault, completion: $0) }).get() )
+        
+        // Check that fetching the item again shows changes
+        if let items = try? awaitResult({ self.client.listVaultItems(inVault: vault, completion: $0) }).get() {
+            guard let itemThatShouldUpdate = items.first(where: {$0.id == update.id }) as? VaultLogin else { XCTFail(); return }
+            XCTAssertEqual(itemThatShouldUpdate.user, update.user)
+        }
+        else {
+            XCTFail(); return
+        }
+        
+        // Compare the value that gets written to the secure vault service.
+        guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,
+              let paramBlob = self.secureVaultClient.updateVaultParamBlob else { return }
+        XCTAssertEqual(paramBlobFormat, VaultSchema.latest.rawValue)
+        
+        // Decode the blob that was saved to the secure vault service so we can inspect it.
+        guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
+        guard let updatedItem = decodedBlob.login.first(where: {$0.id == update.id}) else { XCTFail(); return }
+        
+        XCTAssertEqual(update.id, updatedItem.id)
+        XCTAssertEqual(update.user, updatedItem.user)
+        
+        XCTAssertNotEqual(updatedAt, updatedItem.updatedAt)
+    }
+
+    func testUpdateCreditCard() {
         self.useKeychain()
         self.setUsername("Foo")
 
@@ -481,13 +658,13 @@ class PasswordManagerClientTests: XCTestCase {
         // Get the vault items so we can change one
         guard let items = try? awaitResult({ self.client.listVaultItems(inVault: vault, completion: $0) }).get() else { XCTFail(); return }
 
-        guard let update = items.first as? VaultLogin else { XCTFail(); return }
+        guard let update = items.first(where: { $0.id == "3" }) as? VaultCreditCard else { XCTFail(); return }
 
         // make some updates
-        update.user = "Squirt"
-        update.url = "keyboard.com"
-        update.password = VaultItemPassword(value: "ThisCan'tGoOn")
-        update.notes = VaultItemNote(value: "Hair Salon, Milk, Cookies, Vacation")
+        update.cardType = "American Express"
+        update.cardNumber = VaultItemValue(value: "1111222233334444")
+        update.cardSecurityCode = VaultItemValue(value: "000")
+        update.notes = VaultItemNote(value: "I am Captain America")
 
         // Save the `updated` property so we can make sure it changes
         let updatedAt = update.updatedAt
@@ -497,8 +674,9 @@ class PasswordManagerClientTests: XCTestCase {
 
         // Check that fetching the item again shows changes
         if let items = try? awaitResult({ self.client.listVaultItems(inVault: vault, completion: $0) }).get() {
-            guard let itemThatShouldUpdate = items.first(where: {$0.id == update.id }) as? VaultLogin else { XCTFail(); return }
-            XCTAssertEqual(itemThatShouldUpdate.user, update.user)
+            guard let itemThatShouldUpdate = items.first(where: {$0.id == update.id }) as? VaultCreditCard else { XCTFail(); return }
+            XCTAssertEqual(itemThatShouldUpdate.cardType, update.cardType)
+            XCTAssertEqual(try? itemThatShouldUpdate.cardNumber?.getValue(), try? update.cardNumber?.getValue())
         }
         else {
             XCTFail(); return
@@ -511,15 +689,120 @@ class PasswordManagerClientTests: XCTestCase {
 
         // Decode the blob that was saved to the secure vault service so we can inspect it.
         guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
-        guard let updatedItem = decodedBlob.login.first(where: {$0.id == update.id}) else { XCTFail(); return }
+        guard let updatedItem = decodedBlob.creditCard.first(where: {$0.id == update.id}) else { XCTFail(); return }
 
         XCTAssertEqual(update.id, updatedItem.id)
-        XCTAssertEqual(update.user, updatedItem.user)
+        XCTAssertEqual(update.cardType, updatedItem.cardType)
 
         XCTAssertNotEqual(updatedAt, updatedItem.updatedAt)
     }
 
+    func testUpdateBankAccount() {
+        self.useKeychain()
+        self.setUsername("Foo")
+
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        // Get the vault items so we can change one
+        guard let items = try? awaitResult({ self.client.listVaultItems(inVault: vault, completion: $0) }).get() else { XCTFail(); return }
+
+        guard let update = items.first(where: { $0.id == "4" }) as? VaultBankAccount else { XCTFail(); return }
+
+        // make some updates
+        update.accountType = "Checking"
+        update.bankName = "The Anonyomous Bank"
+        update.accountNumber = VaultItemValue(value: "1111222233334444")
+        update.accountPin = VaultItemValue(value: "0000")
+        update.notes = VaultItemNote(value: "Security Meets Privacy")
+
+        // Save the `updated` property so we can make sure it changes
+        let updatedAt = update.updatedAt
+
+        // Save the updates to the password manager
+        XCTAssertNoThrow(try awaitResult({ self.client.update(item: update, in: vault, completion: $0) }).get() )
+
+        // Check that fetching the item again shows changes
+        if let items = try? awaitResult({ self.client.listVaultItems(inVault: vault, completion: $0) }).get() {
+            guard let itemThatShouldUpdate = items.first(where: {$0.id == update.id }) as? VaultBankAccount else { XCTFail(); return }
+            XCTAssertEqual(itemThatShouldUpdate.accountType, update.accountType)
+            XCTAssertEqual(try? itemThatShouldUpdate.accountNumber?.getValue(), try? update.accountNumber?.getValue())
+        }
+        else {
+            XCTFail(); return
+        }
+
+        // Compare the value that gets written to the secure vault service.
+        guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,
+              let paramBlob = self.secureVaultClient.updateVaultParamBlob else { return }
+        XCTAssertEqual(paramBlobFormat, VaultSchema.latest.rawValue)
+
+        // Decode the blob that was saved to the secure vault service so we can inspect it.
+        guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
+        guard let updatedItem = decodedBlob.bankAccount.first(where: {$0.id == update.id}) else { XCTFail(); return }
+
+        XCTAssertEqual(update.id, updatedItem.id)
+        XCTAssertEqual(update.accountType, updatedItem.accountType)
+
+        XCTAssertNotEqual(updatedAt, updatedItem.updatedAt)
+    }
+
+    func testUpdateUnsupportedType() {
+        self.useKeychain()
+        self.setUsername("Foo")
+
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        let item = VaultItem(id: "123", createdAt: Date(), updatedAt: Date())
+
+        // Save the updates to the password manager
+        XCTAssertThrowsError(try awaitResult({ self.client.update(item: item, in: vault, completion: $0) }).get() )
+    }
+    
     func testRemoveVaultLoginUnlockedVault() {
+        self.useKeychain()
+        self.setUsername("Foo")
+        
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        let secureVaultData = tuple.data
+        self.unlockVault()
+        
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+        
+        // Save the number of items currently in the vault
+        let vaultItemCountBeforeAdd = secureVaultData.vaultData.login.count
+        
+        // Remove the item
+        XCTAssertNoThrow(try awaitResult({ self.client.removeVaultItem(id: "1", from: vault, completion: $0)}).get())
+        
+        // Compare the value that gets written to the secure vault service.
+        guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,
+              let paramBlob = self.secureVaultClient.updateVaultParamBlob else { return }
+        
+        XCTAssertEqual(paramBlobFormat, VaultSchema.latest.rawValue)
+        
+        // Decode the blob that was saved to the secure vault service so we can inspect it.
+        guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
+        
+        // Check that the item count has decreased
+        XCTAssertEqual(decodedBlob.login.count, vaultItemCountBeforeAdd - 1)
+    }
+    
+    func testRemoveVaultCreditCardUnlockedVault() {
         self.useKeychain()
         self.setUsername("Foo")
 
@@ -533,10 +816,11 @@ class PasswordManagerClientTests: XCTestCase {
         let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
 
         // Save the number of items currently in the vault
-        let vaultItemCountBeforeAdd = secureVaultData.vaultData.login.count
+        let vaultItemCountBeforeAdd = secureVaultData.vaultData.creditCard.count
+        guard let creditCard = secureVaultData.vaultData.creditCard.first else { XCTFail(); return }
 
         // Remove the item
-        XCTAssertNoThrow(try awaitResult({ self.client.removeVaultItem(id: "1", from: vault, completion: $0)}).get())
+        XCTAssertNoThrow(try awaitResult({ self.client.removeVaultItem(id: creditCard.id, from: vault, completion: $0)}).get())
 
         // Compare the value that gets written to the secure vault service.
         guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,
@@ -548,21 +832,118 @@ class PasswordManagerClientTests: XCTestCase {
         guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
 
         // Check that the item count has decreased
-        XCTAssertEqual(decodedBlob.login.count, vaultItemCountBeforeAdd - 1)
+        XCTAssertEqual(decodedBlob.creditCard.count, vaultItemCountBeforeAdd - 1)
     }
 
+    func testRemoveVaultBankAccountUnlockedVault() {
+        self.useKeychain()
+        self.setUsername("Foo")
+
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        let secureVaultData = tuple.data
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        // Save the number of items currently in the vault
+        let vaultItemCountBeforeAdd = secureVaultData.vaultData.bankAccount.count
+        guard let bankAccount = secureVaultData.vaultData.bankAccount.first else { XCTFail(); return }
+
+        // Remove the item
+        XCTAssertNoThrow(try awaitResult({ self.client.removeVaultItem(id: bankAccount.id, from: vault, completion: $0)}).get())
+
+        // Compare the value that gets written to the secure vault service.
+        guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,
+              let paramBlob = self.secureVaultClient.updateVaultParamBlob else { return }
+
+        XCTAssertEqual(paramBlobFormat, VaultSchema.latest.rawValue)
+
+        // Decode the blob that was saved to the secure vault service so we can inspect it.
+        guard let decodedBlob = try? VaultSchema.CurrentModelSchema.Decoder().decode(data: paramBlob) else { XCTFail(); return }
+
+        // Check that the item count has decreased
+        XCTAssertEqual(decodedBlob.bankAccount.count, vaultItemCountBeforeAdd - 1)
+    }
+
+    func testGetVaultItemLogin() {
+        self.useKeychain()
+        self.setUsername("Foo")
+
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        let login = try? awaitResult({ self.client.getVaultItem(id: "1", in: vault, completion: $0)}).get() as? VaultLogin
+        XCTAssertNotNil(login)
+    }
+
+    func testGetVaultItemCreditCard() {
+        self.useKeychain()
+        self.setUsername("Foo")
+
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        let creditCard = try? awaitResult({ self.client.getVaultItem(id: "3", in: vault, completion: $0)}).get() as? VaultCreditCard
+        XCTAssertNotNil(creditCard)
+    }
+
+    func testGetVaultItemBankAccount() {
+        self.useKeychain()
+        self.setUsername("Foo")
+
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        let bankAccount = try? awaitResult({ self.client.getVaultItem(id: "4", in: vault, completion: $0)}).get() as? VaultBankAccount
+        XCTAssertNotNil(bankAccount)
+    }
+
+    func testGetVaultItemNotFound() {
+        self.useKeychain()
+        self.setUsername("Foo")
+
+        // put some known vault data in the store so it can be fetched.
+        let tuple = self.populateServiceWithKnownVault()
+        let secureVault = tuple.vault
+        self.unlockVault()
+
+        // `Vault` is a wrapper of an id, we don't have to fetch for testing
+        let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
+
+        let item = try? awaitResult({ self.client.getVaultItem(id: "10001", in: vault, completion: $0)}).get()
+        XCTAssertNil(item)
+    }
+    
     func testReset() {
         XCTAssertNoThrow(try self.client.reset())
         XCTAssertTrue(self.secureVaultClient.resetCalled)
         XCTAssertTrue(self.client.isLocked())
     }
-
+    
     func testGetSecretCode() {
         let key = KeyDerivingKey(hexdecimalString: Array(0..<32).map { _ in return "F"}.joined())
         self.keyManager.getKeyDerivingKeyResult = key
         self.service.userSubject = nil
         XCTAssertEqual(self.client.getSecretCode(), "00000-FFFFFF-FFFFF-FFFFF-FFFFF-FFFFF-FFFFFF")
-
+        
         self.service.userSubject = "F7FF78AB4C3F4423921989AF6905538B"
         XCTAssertEqual(self.client.getSecretCode(), "DF286-FFFFFF-FFFFF-FFFFF-FFFFF-FFFFF-FFFFFF")
     }
@@ -572,17 +953,17 @@ class PasswordManagerClientTests: XCTestCase {
         
         let testVault = VaultMetadata(id: "entitled to your face", owner: "", version: 1, blobFormat: "JSON", createdAt: Date(), updatedAt: Date(), owners: [Owner(id: "foo", issuer: "sudoplatform.sudoservice")])
         self.secureVaultClient.listVaultsMetadataOnlyResult = .success([testVault])
-
+        
         let testSudo = Sudo(id: "foo", version: 1, createdAt: Date(), updatedAt: Date())
         self.sudoProfilesclient.listSudosResult = ListSudosResult.success(sudos: [testSudo])
-
+        
         self.entitlements.getEntitlementsReturn = EntitlementsSet(name: "",
                                                                   description: "",
                                                                   entitlements: [Entitlement(name: "sudoplatform.vault.vaultMaxPerSudo", description: nil, value: 1)],
                                                                   version: 0,
                                                                   created: Date(),
                                                                   updated: Date())
-
+        
         if let state = try? awaitResult( { self.client.getEntitlementState(completion: $0) }).get() {
             guard let item = state.first else { XCTFail(); return }
             XCTAssertEqual(item.name, .maxVaultPerSudo)
@@ -593,6 +974,49 @@ class PasswordManagerClientTests: XCTestCase {
         }
     }
 
+    // With no sudos created, no entitlements should be returned.
+    func testGetEntitlementStateNoSudos() {
+        self.unlockVault()
+
+        let testVault = VaultMetadata(id: "entitled to your face", owner: "", version: 1, blobFormat: "JSON", createdAt: Date(), updatedAt: Date(), owners: [Owner(id: "foo", issuer: "sudoplatform.sudoservice")])
+        self.secureVaultClient.listVaultsMetadataOnlyResult = .success([testVault])
+
+        self.sudoProfilesclient.listSudosResult = ListSudosResult.success(sudos: [])
+
+        self.entitlements.getEntitlementsReturn = EntitlementsSet(name: "",
+                                                                  description: "",
+                                                                  entitlements: [Entitlement(name: "sudoplatform.vault.vaultMaxPerSudo", description: nil, value: 1)],
+                                                                  version: 0,
+                                                                  created: Date(),
+                                                                  updated: Date())
+
+        if let state = try? awaitResult( { self.client.getEntitlementState(completion: $0) }).get() {
+            XCTAssertTrue(state.isEmpty)
+        } else {
+            XCTFail(); return
+        }
+    }
+
+    func testGetEntitlement() {
+        // With no entitlements set we should get one back with zero entitlements.
+        self.entitlements.getEntitlementsReturn = EntitlementsSet(name: "",
+                                                                  description: "",
+                                                                  entitlements: [],
+                                                                  version: 0,
+                                                                  created: Date(),
+                                                                  updated: Date())
+
+
+        if let expectedResult = (try? awaitResult( { self.client.getEntitlement(completion: $0)}).get())?.first {
+            XCTAssertEqual(expectedResult.name.rawValue,Entitlement.Name.maxVaultPerSudo.rawValue)
+            XCTAssertEqual(expectedResult.limit, 0)
+            }
+        else {
+            XCTFail(); return
+        }
+    }
+
+
     private func populateServiceWithKnownVault() -> (vault: SudoSecureVault.Vault, data: VaultProxy) {
         let data = self.createVaultForTesting()
         let encoded = try! VaultSchema.CurrentModelSchema.Encoder().encode(vault: data.vaultData)
@@ -600,12 +1024,12 @@ class PasswordManagerClientTests: XCTestCase {
         self.secureVaultClient.listVaultsResult = .success([secureVault])
         return (vault: secureVault, data: data)
     }
-
+    
     private func isError(_ error: Error, ofType type: PasswordManagerError.ErrorType) -> Bool {
         guard let clientError = (error as? PasswordManagerError) else { return false }
         return clientError.type == type
     }
-
+    
     func createVaultForTesting() -> VaultProxy {
         let now = Date()
         var first = VaultProxy(secureVaultId: "1",
@@ -616,14 +1040,16 @@ class PasswordManagerClientTests: XCTestCase {
                                owner: "",
                                owners: [],
                                vaultData: VaultSchema.CurrentModelSchema.Vault(bankAccount: [], creditCard: [], generatedPassword: [], login: [], schemaVersion: 1))
-
+        
         first.vaultData.login.append(vaultItem1)
         first.vaultData.login.append(vaultItem2)
+        first.vaultData.creditCard.append(vaultItem3)
+        first.vaultData.bankAccount.append(vaultItem4)
         return first
     }
-
+    
     lazy var vaultItem1: VaultLoginProxy = {
-
+        
         return VaultLoginProxy(createdAt: Date(),
                                id: "1",
                                name: "Item1",
@@ -634,7 +1060,7 @@ class PasswordManagerClientTests: XCTestCase {
                                url: "npr.org",
                                user: "Joe")
     }()
-
+    
     lazy var vaultItem2: VaultLoginProxy = {
         return VaultLoginProxy(createdAt: Date(),
                                id: "2",
@@ -645,6 +1071,38 @@ class PasswordManagerClientTests: XCTestCase {
                                password: .init(secureValue: "SecretPassword", createdAt: Date(), replacedAt: Date()),
                                url: "cnn.com",
                                user: "Steve")
+    }()
+
+    lazy var vaultItem3: VaultCreditCardProxy = {
+        return VaultCreditCardProxy(createdAt: Date(),
+                                    id: "3",
+                                    name: "Item3",
+                                    notes: .init(secureValue: "Hello World"),
+                                    updatedAt: Date(),
+                                    type: .creditCard,
+                                    cardExpiration: Date(),
+                                    cardName: "Steve Rogers",
+                                    cardNumber: .init(secureValue: "1234123412341234"),
+                                    cardSecurityCode: .init(secureValue: "1234"),
+                                    cardType: "Visa")
+    }()
+
+    lazy var vaultItem4: VaultBankAccountProxy = {
+        return VaultBankAccountProxy(createdAt: Date(),
+                                     id: "4",
+                                     name: "Item4",
+                                     notes: .init(secureValue: "Hello World"),
+                                     updatedAt: Date(),
+                                     type: .bankAccount,
+                                     accountNumber: .init(secureValue: "1234123412341234"),
+                                     accountPin: .init(secureValue: "1234"),
+                                     accountType: "Savings",
+                                     bankName: "Bank of Anonyome",
+                                     branchAddress: "1111 Anonyomous Lane",
+                                     branchPhone: "111-222-3333",
+                                     ibanNumber: "11-222-333-444",
+                                     routingNumber: "1234123124",
+                                     swiftCode: "123-123-123-123")
     }()
 }
 

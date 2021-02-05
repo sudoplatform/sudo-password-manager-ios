@@ -16,6 +16,8 @@ import SudoLogging
 ///
 /// Some of these are their own types, but others are type alias to the interal vault json.
 internal typealias VaultLoginProxy = VaultSchema.CurrentModelSchema.Login
+internal typealias VaultCreditCardProxy = VaultSchema.CurrentModelSchema.CreditCard
+internal typealias VaultBankAccountProxy = VaultSchema.CurrentModelSchema.BankAccount
 internal typealias VaultNoteProxy = VaultSchema.CurrentModelSchema.SecureField
 internal typealias VaultPasswordProxy = VaultSchema.CurrentModelSchema.PasswordField
 internal typealias VaultSecureFieldProxy = VaultSchema.CurrentModelSchema.SecureField
@@ -161,6 +163,18 @@ class VaultStore {
         self.vaults[id] = vault
     }
 
+    func add(creditCard: VaultCreditCardProxy, toVaultWithId id: String) throws {
+        guard var vault = self.vaults[id] else { throw PasswordManagerError.invalidVault }
+        vault.vaultData.creditCard.append(creditCard)
+        self.vaults[id] = vault
+    }
+
+    func add(bankAccount: VaultBankAccountProxy, toVaultWithId id: String) throws {
+        guard var vault = self.vaults[id] else { throw PasswordManagerError.invalidVault }
+        vault.vaultData.bankAccount.append(bankAccount)
+        self.vaults[id] = vault
+    }
+
     func update(login: VaultLoginProxy, in vaultId: String) throws {
         guard var vault = self.vaults[vaultId] else { throw PasswordManagerError.invalidVault }
         vault.vaultData.login.removeAll(where: { $0.id == login.id })
@@ -170,9 +184,29 @@ class VaultStore {
         self.vaults[vaultId] = vault
     }
 
-    func removeVaultLogin(withId id: String, vaultId: String) throws {
+    func update(creditCard: VaultCreditCardProxy, in vaultId: String) throws {
+        guard var vault = self.vaults[vaultId] else { throw PasswordManagerError.invalidVault }
+        vault.vaultData.creditCard.removeAll(where: { $0.id == creditCard.id })
+        var mutableCreditCard = creditCard
+        mutableCreditCard.updatedAt = Date()
+        vault.vaultData.creditCard.append(mutableCreditCard)
+        self.vaults[vaultId] = vault
+    }
+
+    func update(bankAccount: VaultBankAccountProxy, in vaultId: String) throws {
+        guard var vault = self.vaults[vaultId] else { throw PasswordManagerError.invalidVault }
+        vault.vaultData.bankAccount.removeAll(where: { $0.id == bankAccount.id })
+        var mutableBankAccount = bankAccount
+        mutableBankAccount.updatedAt = Date()
+        vault.vaultData.bankAccount.append(mutableBankAccount)
+        self.vaults[vaultId] = vault
+    }
+
+    func removeVaultItem(withId id: String, vaultId: String) throws {
         guard var vault = self.vaults[vaultId] else { throw PasswordManagerError.invalidVault }
         vault.vaultData.login.removeAll(where: { $0.id == id })
+        vault.vaultData.creditCard.removeAll(where: { $0.id == id })
+        vault.vaultData.bankAccount.removeAll(where: { $0.id == id })
         self.vaults[vaultId] = vault
     }
 }

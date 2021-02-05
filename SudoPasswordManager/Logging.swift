@@ -23,7 +23,7 @@ extension Logger {
     }()
 }
 
-extension DefaultPasswordManagerClient {
+extension DefaultSudoPasswordManagerClient {
     /// Get/Set the global log level.
     public static var logLevel: SudoLogging.LogLevel {
         get {

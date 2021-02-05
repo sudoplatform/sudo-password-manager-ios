@@ -19,8 +19,8 @@ public enum PasswordManagerRegistrationStatus {
     case missingSecretCode
 }
 
-/// user facing interaction start point
-public protocol PasswordManagerClient: class {
+/// Client to access password manager functionality.
+public protocol SudoPasswordManagerClient: class {
 
     /// Checks if the password manager is registered.
     /// - Parameter completion: Completion hander to return registration result.
@@ -124,12 +124,21 @@ public protocol PasswordManagerClient: class {
     /// - Throws: An error if the item cannot be updated (e.g. vault locked)
     func removeVaultItem(id: String, from vault: Vault, completion: @escaping (Result<Void, Error>) -> Void)
     
-    /// Creates a Rescue Kit PDF with the user's secret code.
-    /// //
-    /// - Returns: A Rescue Kit PDF with the secret code.
+    /// Creates a Rescue Kit PDF with the user's secret code using the default template.
+    ///
+    /// - Returns: A Rescue Kit PDF with the secret code. Nil If the template image isn't found in the SDK bundle.
     func renderRescueKit() -> PDFDocument?
-    
-    /// Fetches the current Entitlement State.
-    /// - Parameter completion: Completion handler when fetching the current entitlement state suceeds or fails.
+
+    /// Creates a Rescue Kit PDF with the user's secret code from the provided template.
+    /// - Parameter templatePDF: An optional template image to use instead of the default.
+    /// - Returns: A Rescue Kit PDF with the secret code.
+    func renderRescueKit(templatePDF: PDFDocument) -> PDFDocument?
+
+    //Fetches the list of [Entitlement] that indicates the resources the user is entitled to use.
+    // - Parameter completion: handler called when fetching the entitlements succeeds or fails.
+    func getEntitlement(completion: @escaping (Result<[Entitlement], Error>) -> Void)
+
+    // Fetches the current [EntitlementState] which includes information about how many entitlements have been consumed.
+    /// - Parameter completion: Completion handler when fetching the current entitlement state succeeds or fails. An empty list indicates no entitlements have been consumed.
     func getEntitlementState(completion: @escaping (Result<[EntitlementState], Error>) -> Void)
 }

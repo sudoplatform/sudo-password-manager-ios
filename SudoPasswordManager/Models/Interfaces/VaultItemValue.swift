@@ -6,6 +6,9 @@
 
 import Foundation
 
+/// Represents a note for items in the vault. Maintains backwards compatilbility.
+public typealias VaultItemNote = VaultItemValue
+
 /// SecureField provider either provides a plain text value or ciphertext along with a function that decrypts it.
 enum SecureFieldValue {
     /// Secure field is a plaintext value. No decryption required
@@ -22,8 +25,8 @@ enum SecureFieldValue {
     }
 }
 
-/// Represents a note for items in the vault
-public class VaultItemNote {
+/// Represents a secure field for items in the vault.
+public class VaultItemValue {
 
     /// - Returns: the clear text note
     /// - Throws: An error if the note cannot be displayed, e.g. if the password manager is locked.
