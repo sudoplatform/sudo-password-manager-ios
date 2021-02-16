@@ -20,7 +20,7 @@ public class VaultItem {
     /// Time created. Unix Time (seconds since epoch)
     public let updatedAt: Date
 
-    init(id: String, createdAt: Date, updatedAt: Date) {
+    public init(id: String, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.createdAt = createdAt
         self.updatedAt = updatedAt

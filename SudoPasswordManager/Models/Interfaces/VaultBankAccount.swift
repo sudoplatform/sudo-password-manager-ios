@@ -42,7 +42,7 @@ public class VaultBankAccount: VaultItem {
     /// Account Pin of this item.
     public var accountPin: VaultItemValue?
 
-    init(id: String,
+    public init(id: String,
          createdAt: Date,
          updatedAt: Date,
          name: String,

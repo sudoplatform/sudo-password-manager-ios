@@ -9,6 +9,15 @@ import Foundation
 /// Data to represent the entitlements for Password Manager
 public struct Entitlement {
 
+    /// Creates an Entitlement
+    /// - Parameters:
+    ///   - name: Name of the entitlement
+    ///   - limit: The entitlement's limit
+    public init(name: Entitlement.Name, limit: Int) {
+        self.name = name
+        self.limit = limit
+    }
+
     /// Name of the Entitlement
     public var name: Name
 
@@ -24,6 +33,19 @@ public struct Entitlement {
 
 /// Data to represent the current Entitlement State for Password Manager
 public struct EntitlementState {
+
+    /// Creates an EntitlementState
+    /// - Parameters:
+    ///   - name: Name of the entitlement
+    ///   - sudoId: Sudo which owns the entitlement consuming vaults
+    ///   - limit: The entitlement's limit
+    ///   - value: The current value of entitlements consumed.
+    public init(name: Entitlement.Name, sudoId: String, limit: Int, value: Int) {
+        self.name = name
+        self.sudoId = sudoId
+        self.limit = limit
+        self.value = value
+    }
 
     /// Name of the Entitlement
     public var name: Entitlement.Name

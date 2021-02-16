@@ -9,7 +9,7 @@ import Foundation
 /// Represents the details for a login.
 public class VaultLogin: VaultItem {
 
-    /// Username for the servivce
+    /// Username for the service
     public var user: String?
 
     /// URL or domain of the service.
@@ -34,7 +34,7 @@ public class VaultLogin: VaultItem {
     /// A list of previous passwords used for this service.  Currently contains a complete list of all previously saved passwords.
     private(set) public var previousPasswords: [VaultItemPassword]
 
-    init(id: String, createdAt: Date, updatedAt: Date, user: String?, url: String?, name: String, notes: VaultItemNote?, password: VaultItemPassword?, previousPasswords: [VaultItemPassword]) {
+    public init(id: String, createdAt: Date, updatedAt: Date, user: String?, url: String?, name: String, notes: VaultItemNote?, password: VaultItemPassword?, previousPasswords: [VaultItemPassword]) {
         self.user = user
         self.url = url
         self.name = name
@@ -44,7 +44,7 @@ public class VaultLogin: VaultItem {
         super.init(id: id, createdAt: createdAt, updatedAt: updatedAt)
     }
 
-    convenience init(user: String?, url: String?, name: String, notes: VaultItemNote?, password: VaultItemPassword?, previousPasswords: [VaultItemPassword]) {
+    public convenience init(user: String?, url: String?, name: String, notes: VaultItemNote?, password: VaultItemPassword?, previousPasswords: [VaultItemPassword]) {
         let id = UUID().uuidString
         let now = Date()
         self.init(id: id, createdAt: now, updatedAt: now, user: user, url: url, name: name, notes: notes, password: password, previousPasswords: previousPasswords)

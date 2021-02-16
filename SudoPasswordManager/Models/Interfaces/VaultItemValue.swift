@@ -6,15 +6,15 @@
 
 import Foundation
 
-/// Represents a note for items in the vault. Maintains backwards compatilbility.
+/// Represents a note for items in the vault. Maintains backwards compatibility.
 public typealias VaultItemNote = VaultItemValue
 
-/// SecureField provider either provides a plain text value or ciphertext along with a function that decrypts it.
+/// SecureField provider either provides a plain text value or cipher-text along with a function that decrypts it.
 enum SecureFieldValue {
     /// Secure field is a plaintext value. No decryption required
     case plainText(String)
 
-    /// Secure field is stored as ciphertext with the required decryption function
+    /// Secure field is stored as cipher-text with the required decryption function
     case cipherText(String, () throws -> String)
 
     func reveal() throws -> String {

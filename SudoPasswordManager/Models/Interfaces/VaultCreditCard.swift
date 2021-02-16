@@ -30,7 +30,7 @@ public class VaultCreditCard: VaultItem {
     /// Credit Card Security Code of this item.
     public var cardSecurityCode: VaultItemValue?
 
-    init(id: String,
+    public init(id: String,
          createdAt: Date,
          updatedAt: Date,
          name: String,

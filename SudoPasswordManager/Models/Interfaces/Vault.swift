@@ -22,7 +22,7 @@ public class Vault {
 
     public let owners: [VaultOwner]
 
-    internal init(id: String, owner: String, owners: [VaultOwner], createdAt: Date, updatedAt: Date) {
+    public init(id: String, owner: String, owners: [VaultOwner], createdAt: Date, updatedAt: Date) {
         self.id = id
         self.owner = owner
         self.owners = owners
@@ -37,8 +37,8 @@ public class Vault {
 }
 
 public class VaultOwner {
-    let id: String
-    let issuer: String
+    public let id: String
+    public let issuer: String
 
     public init(id: String, issuer: String) {
         self.id = id

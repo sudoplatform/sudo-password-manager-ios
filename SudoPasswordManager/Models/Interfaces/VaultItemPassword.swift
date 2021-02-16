@@ -14,7 +14,7 @@ public class VaultItemPassword {
     /// when this item was replaced
     internal(set) public var replaced: Date?
 
-    /// Fetches the password value from the vault store. Passwords are stored in memory as ciphertext as an added layer of security.
+    /// Fetches the password value from the vault store. Passwords are stored in memory as cipher-text as an added layer of security.
     /// - Returns: the clear text password
     /// - Throws: An error if the password cannot be displayed, e.g. if the password manager is locked.
     public func getValue() throws -> String {

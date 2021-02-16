@@ -51,6 +51,7 @@
 		C3BFF11924DD937400D870FC /* PasswordGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3BFF11824DD937400D870FC /* PasswordGeneratorTests.swift */; };
 		C3BFF11B24DD937400D870FC /* SudoPasswordManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3BFF10D24DD937300D870FC /* SudoPasswordManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C3BFF12524DD93CB00D870FC /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3BFF12424DD93CB00D870FC /* PasswordGenerator.swift */; };
+		CA7E6C0725D9A9BA00DD9C36 /* VaultItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA7E6C0625D9A9BA00DD9C36 /* VaultItemTests.swift */; };
 		CE65DA6B252B6CD500C35EA4 /* Entitlement.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE65DA6A252B6CD500C35EA4 /* Entitlement.swift */; };
 		CE7B3A97251A9B3200B2622B /* RescueKitGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7B3A96251A9B3200B2622B /* RescueKitGenerator.swift */; };
 		CE7B3A9B251A9BE900B2622B /* RescueKitSecretCodePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE7B3A9A251A9BE900B2622B /* RescueKitSecretCodePage.swift */; };
@@ -133,6 +134,7 @@
 		C3BFF11A24DD937400D870FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C3BFF12424DD93CB00D870FC /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		C465C8726A6E3630C5FE5890 /* Pods-SudoPasswordManager-SudoPasswordManagerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SudoPasswordManager-SudoPasswordManagerTests.debug.xcconfig"; path = "Target Support Files/Pods-SudoPasswordManager-SudoPasswordManagerTests/Pods-SudoPasswordManager-SudoPasswordManagerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		CA7E6C0625D9A9BA00DD9C36 /* VaultItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultItemTests.swift; sourceTree = "<group>"; };
 		CE65DA6A252B6CD500C35EA4 /* Entitlement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entitlement.swift; sourceTree = "<group>"; };
 		CE7B3A96251A9B3200B2622B /* RescueKitGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RescueKitGenerator.swift; sourceTree = "<group>"; };
 		CE7B3A9A251A9BE900B2622B /* RescueKitSecretCodePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RescueKitSecretCodePage.swift; sourceTree = "<group>"; };
@@ -322,6 +324,7 @@
 				3288304D250F19B500ECB31E /* HexdecimalTests.swift */,
 				32883051250F39CF00ECB31E /* SecretCodeTests.swift */,
 				CEA886DA251BD69E00E72008 /* RescueKitGeneratorTests.swift */,
+				CA7E6C0625D9A9BA00DD9C36 /* VaultItemTests.swift */,
 			);
 			path = SudoPasswordManagerTests;
 			sourceTree = "<group>";
@@ -605,6 +608,7 @@
 				3288304E250F19B500ECB31E /* HexdecimalTests.swift in Sources */,
 				32C04EAF24F85C6F00B2269F /* DefaultPasswordClientServiceTests.swift in Sources */,
 				32883052250F39CF00ECB31E /* SecretCodeTests.swift in Sources */,
+				CA7E6C0725D9A9BA00DD9C36 /* VaultItemTests.swift in Sources */,
 				32C04EAD24F58BA800B2269F /* awaitResult.swift in Sources */,
 				32499367256341DF00DEF08F /* EntitlementClientMock.swift in Sources */,
 				32401E8F25433E9300BA890A /* MockSudoProfilesClient.swift in Sources */,
