@@ -54,6 +54,16 @@ class VaultItemTests: XCTestCase {
         XCTAssertEqual(try? login.password?.getValue(), "password")
     }
 
+    func testVaultItemPassword() {
+        let now = Date()
+        let value = "password"
+        let secureValue = SecureFieldValue.plainText(value)
+        let password = VaultItemPassword(value: secureValue, created: now, replaced: now)
+        XCTAssertEqual(try? password.getValue(), value)
+        XCTAssertEqual(password.created, now)
+        XCTAssertEqual(password.replaced, now)
+    }
+
     func testBankAccount() {
         let now = Date()
         let note = VaultItemNote(value: "note")

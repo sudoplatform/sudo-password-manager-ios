@@ -23,7 +23,7 @@ public class VaultItemPassword {
 
     let value: SecureFieldValue
 
-    init(value: SecureFieldValue, created: Date, replaced: Date?) {
+    public init(value: SecureFieldValue, created: Date, replaced: Date?) {
         self.value = value
         self.created = created
         self.replaced = replaced

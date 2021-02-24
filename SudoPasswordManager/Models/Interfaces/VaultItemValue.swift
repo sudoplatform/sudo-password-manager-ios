@@ -10,7 +10,7 @@ import Foundation
 public typealias VaultItemNote = VaultItemValue
 
 /// SecureField provider either provides a plain text value or cipher-text along with a function that decrypts it.
-enum SecureFieldValue {
+public enum SecureFieldValue {
     /// Secure field is a plaintext value. No decryption required
     case plainText(String)
 
