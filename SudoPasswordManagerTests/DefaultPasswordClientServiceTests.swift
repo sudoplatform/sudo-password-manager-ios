@@ -51,18 +51,20 @@ class DefaultPasswordClientServiceTests: XCTestCase {
 
     func testGetOwnershipProofSuccess() {
         let expectation = self.expectation(description: "")
-        self.sudoProfilesClient.getOwnershipProofResult = GetOwnershipProofResult.success(jwt: "Foo")
+        self.sudoProfilesClient.getOwnershipProofCompletionResult = .success(jwt: "Foo")
+
         self.service.getOwnershipProof(sudoId: "Foo") { (result) in
             expectation.fulfill()
             XCTAssertEqual(try? result.get(), "Foo")
-            XCTAssertEqual(self.sudoProfilesClient.getOwnershipProofParamSudo?.id, "Foo")
+            XCTAssertEqual(self.sudoProfilesClient.getOwnershipProofParameters?.sudo.id, "Foo")
+
         }
         self.waitForExpectations(timeout: 5, handler: nil)
     }
 
     func testGetOwnershipProofFailure() {
         let expectation = self.expectation(description: "")
-        self.sudoProfilesClient.getOwnershipProofResult = GetOwnershipProofResult.failure(cause: NSError.some)
+        self.sudoProfilesClient.getOwnershipProofCompletionResult = .failure(cause: NSError.some)
         self.service.getOwnershipProof(sudoId: "Foo") { (result) in
             XCTAssertNil(try? result.get())
             expectation.fulfill()

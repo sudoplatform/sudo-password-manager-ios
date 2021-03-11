@@ -9,6 +9,14 @@ import SudoEntitlements
 
 class MockSudoEntitlementsClient: SudoEntitlementsClient {
 
+    var getEntitlementsConsumptionCalled = false
+    var getEntitlementsConsumptionResult: Result<EntitlementsConsumption, Error>?
+    func getEntitlementsConsumption(completion: @escaping ClientCompletion<EntitlementsConsumption>) {
+        if let result = getEntitlementsConsumptionResult {
+            completion(result)
+        }
+    }
+
     var resetCalled: Bool = false
     var resetError: Error? = nil
     func reset() throws {

@@ -955,8 +955,9 @@ class PasswordManagerClientTests: XCTestCase {
         self.secureVaultClient.listVaultsMetadataOnlyResult = .success([testVault])
         
         let testSudo = Sudo(id: "foo", version: 1, createdAt: Date(), updatedAt: Date())
-        self.sudoProfilesclient.listSudosResult = ListSudosResult.success(sudos: [testSudo])
-        
+        self.sudoProfilesclient.listSudosCompletionResult = .success([testSudo])
+
+
         self.entitlements.getEntitlementsReturn = EntitlementsSet(name: "",
                                                                   description: "",
                                                                   entitlements: [Entitlement(name: "sudoplatform.vault.vaultMaxPerSudo", description: nil, value: 1)],
@@ -981,7 +982,7 @@ class PasswordManagerClientTests: XCTestCase {
         let testVault = VaultMetadata(id: "entitled to your face", owner: "", version: 1, blobFormat: "JSON", createdAt: Date(), updatedAt: Date(), owners: [Owner(id: "foo", issuer: "sudoplatform.sudoservice")])
         self.secureVaultClient.listVaultsMetadataOnlyResult = .success([testVault])
 
-        self.sudoProfilesclient.listSudosResult = ListSudosResult.success(sudos: [])
+        self.sudoProfilesclient.listSudosCompletionResult = .success([])
 
         self.entitlements.getEntitlementsReturn = EntitlementsSet(name: "",
                                                                   description: "",

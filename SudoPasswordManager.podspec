@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name                  = 'SudoPasswordManager'
-  spec.version               = '2.2.0'
+  spec.version               = '3.0.0'
   spec.author                = { 'Sudo Platform Engineering' => 'sudoplatform-engineering@anonyome.com' }
   spec.homepage              = 'https://sudoplatform.com'
   spec.summary               = 'Password manager SDK for the Sudo Platform by Anonyome Labs.'
@@ -17,8 +17,8 @@ Pod::Spec.new do |spec|
   spec.dependency 'zxcvbn-ios', '~> 1.0'
   spec.dependency 'SudoLogging', '~> 0.3'
   spec.dependency 'SudoKeyManager', '~> 1.2'
-  spec.dependency 'SudoUser', '>= 7.14', '< 11.0'
-  spec.dependency 'SudoProfiles', '>= 5.6', '< 10.0'
-  spec.dependency 'SudoSecureVault', '>= 2.0', '< 5.0'
-  spec.dependency 'SudoEntitlements', '>= 1.1', '< 3.0'
+  spec.dependency 'SudoUser', '>= 7.14', '< 12.0'
+  spec.dependency 'SudoProfiles', '>= 5.6', '< 11.0'
+  spec.dependency 'SudoSecureVault', '>= 2.0', '< 6.0'
+  spec.dependency 'SudoEntitlements', '>= 1.1', '< 4.0'
 end
