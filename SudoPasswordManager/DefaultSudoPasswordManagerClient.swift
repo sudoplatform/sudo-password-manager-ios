@@ -483,19 +483,17 @@ public class DefaultSudoPasswordManagerClient: SudoPasswordManagerClient {
         }
 
         do {
-            var itemId: String? = nil
+            let itemId: String = UUID().uuidString
+            item.id = itemId
             if let login = item as? VaultLogin {
                 let loginProxy = try self.vaultFactory.createVaultLoginProxy(from: login, vaultKey: vaultKey)
                 try self.vaultStore.add(login: loginProxy, toVaultWithId: vault.id)
-                itemId = loginProxy.id
             } else if let creditCard = item as? VaultCreditCard {
                 let creditCardProxy = try self.vaultFactory.createVaultCreditCardProxy(from: creditCard, vaultKey: vaultKey)
                 try self.vaultStore.add(creditCard: creditCardProxy, toVaultWithId: vault.id)
-                itemId = creditCardProxy.id
             } else if let bankAccount = item as? VaultBankAccount {
                 let bankAccountProxy = try self.vaultFactory.createVaultBankAccountProxy(from: bankAccount, vaultKey: vaultKey)
                 try self.vaultStore.add(bankAccount: bankAccountProxy, toVaultWithId: vault.id)
-                itemId = bankAccountProxy.id
             } else {
                 completion(.failure(PasswordManagerError.invalidFormat))
                 return
@@ -505,7 +503,7 @@ public class DefaultSudoPasswordManagerClient: SudoPasswordManagerClient {
             self.update(vault: vault) { (updateResult) in
                 switch updateResult {
                 case .success:
-                    completion(.success(itemId ?? ""))
+                    completion(.success(itemId))
                 case .failure(let error):
                     completion(.failure(error))
                 }

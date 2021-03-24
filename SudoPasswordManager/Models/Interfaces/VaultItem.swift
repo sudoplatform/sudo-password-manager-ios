@@ -12,7 +12,7 @@ import Foundation
 public class VaultItem {
 
     /// unique id of this item
-    public let id: String
+    public internal(set) var id: String
 
     /// Time created. Unix Time (seconds since epoch)
     public let createdAt: Date

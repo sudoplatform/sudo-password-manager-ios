@@ -457,8 +457,9 @@ class PasswordManagerClientTests: XCTestCase {
         
         // `Vault` is a wrapper of an id, we don't have to fetch for testing
         let vault = Vault(id: secureVault.id, owner: "", owners: [], createdAt: secureVault.createdAt, updatedAt: secureVault.updatedAt)
-        
-        let newCreditCard = VaultCreditCard(id: "Foo",
+
+        let originalItemId = "Foo"
+        let newCreditCard = VaultCreditCard(id: originalItemId,
                                             createdAt: Date(),
                                             updatedAt: Date(),
                                             name: "Bank of Bar",
@@ -475,8 +476,17 @@ class PasswordManagerClientTests: XCTestCase {
         self.keyManager.encryptSecureFieldResult = Data(capacity: 10)
         
         // Add the item, make sure it doesn't throw an error
-        XCTAssertNoThrow(try awaitResult( {self.client.add(item: newCreditCard, toVault: vault, completion: $0) }).get() )
-        
+        let result = awaitResult( {self.client.add(item: newCreditCard, toVault: vault, completion: $0) })
+
+        switch result {
+        case .success(let id):
+            // Make sure the client create it's own id for the new item
+            XCTAssertNotEqual(id, originalItemId)
+        case .failure(let error):
+            XCTFail("Failed to add item with error: \(error)")
+            return
+        }
+
         // Compare the value that gets written to the secure vault service.
         
         guard let paramBlobFormat = self.secureVaultClient.updateVaultParamBlobFormat,

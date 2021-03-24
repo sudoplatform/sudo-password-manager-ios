@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name                  = 'SudoPasswordManager'
-  spec.version               = '3.0.0'
+  spec.version               = '3.0.1'
   spec.author                = { 'Sudo Platform Engineering' => 'sudoplatform-engineering@anonyome.com' }
   spec.homepage              = 'https://sudoplatform.com'
   spec.summary               = 'Password manager SDK for the Sudo Platform by Anonyome Labs.'
