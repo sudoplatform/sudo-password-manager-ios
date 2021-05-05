@@ -1,0 +1,152 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/DefaultSudoPasswordManagerClient.swift",
+      "line": 632,
+      "symbol": "DefaultSudoPasswordManagerClient.getEntitlement(completion:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/Vault.swift",
+      "line": 21,
+      "symbol": "Vault.owner",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/Vault.swift",
+      "line": 23,
+      "symbol": "Vault.owners",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/Vault.swift",
+      "line": 25,
+      "symbol": "Vault.init(id:owner:owners:createdAt:updatedAt:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/Vault.swift",
+      "line": 33,
+      "symbol": "Vault.belongsToSudo(id:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/Vault.swift",
+      "line": 39,
+      "symbol": "VaultOwner",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultBankAccount.swift",
+      "line": 45,
+      "symbol": "VaultBankAccount.init(id:createdAt:updatedAt:name:notes:accountType:bankName:branchAddress:branchPhone:ibanNumber:routingNumber:swiftCode:accountNumber:accountPin:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultBankAccount.swift",
+      "line": 73,
+      "symbol": "VaultBankAccount.init(name:notes:accountType:bankName:branchAddress:branchPhone:ibanNumber:routingNumber:swiftCode:accountNumber:accountPin:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultCreditCard.swift",
+      "line": 33,
+      "symbol": "VaultCreditCard.init(id:createdAt:updatedAt:name:notes:cardType:cardName:cardExpiration:cardNumber:cardSecurityCode:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultCreditCard.swift",
+      "line": 53,
+      "symbol": "VaultCreditCard.init(name:notes:cardType:cardName:cardExpiration:cardNumber:cardSecurityCode:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultItem.swift",
+      "line": 23,
+      "symbol": "VaultItem.init(id:createdAt:updatedAt:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultItemPassword.swift",
+      "line": 26,
+      "symbol": "VaultItemPassword.init(value:created:replaced:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultItemPassword.swift",
+      "line": 32,
+      "symbol": "VaultItemPassword.init(value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultItemValue.swift",
+      "line": 43,
+      "symbol": "VaultItemValue.init(value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultLogin.swift",
+      "line": 37,
+      "symbol": "VaultLogin.init(id:createdAt:updatedAt:user:url:name:notes:password:previousPasswords:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultLogin.swift",
+      "line": 47,
+      "symbol": "VaultLogin.init(user:url:name:notes:password:previousPasswords:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/VaultLogin.swift",
+      "line": 53,
+      "symbol": "VaultLogin.init(user:url:name:notes:password:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/PasswordGenerator.swift",
+      "line": 10,
+      "symbol": "PasswordStrength",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/PasswordManagerError.swift",
+      "line": 59,
+      "symbol": "PasswordManagerError.UserInfoKey",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/PasswordManagerError.swift",
+      "line": 63,
+      "symbol": "PasswordManagerError.init(type:underlyingError:userInfo:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/SudoPasswordManagerClient.swift",
+      "line": 139,
+      "symbol": "SudoPasswordManagerClient.getEntitlement(completion:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh"
+}
