@@ -1,13 +1,6 @@
 {
   "warnings": [
     {
-      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/DefaultSudoPasswordManagerClient.swift",
-      "line": 632,
-      "symbol": "DefaultSudoPasswordManagerClient.getEntitlement(completion:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.instance",
-      "warning": "undocumented"
-    },
-    {
       "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/Models/Interfaces/Vault.swift",
       "line": 21,
       "symbol": "Vault.owner",
@@ -137,13 +130,6 @@
       "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/PasswordManagerError.swift",
       "line": 63,
       "symbol": "PasswordManagerError.init(type:underlyingError:userInfo:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/anonyome/builds/c2dfa4ea/0/platform/password-manager/password-manager-ios/sudo-password-manager-ios-gh/SudoPasswordManager/SudoPasswordManagerClient.swift",
-      "line": 139,
-      "symbol": "SudoPasswordManagerClient.getEntitlement(completion:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     }

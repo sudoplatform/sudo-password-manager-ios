@@ -227,7 +227,7 @@ public class DefaultSudoPasswordManagerClient: SudoPasswordManagerClient {
 
         case (.some(let key), nil):
             // Cached KDK.  Should be most common case
-            //unlockingKey = key
+            // unlockingKey = key
             self.validateCredentials(key: key, passwordData: passwordData, completion: completion)
 
         case (nil, .some(let key)):

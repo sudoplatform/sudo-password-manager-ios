@@ -11,13 +11,13 @@ public struct PasswordManagerError: Error {
 
     /// Types of the errors returned by the password manager.
     public enum ErrorType: String, CaseIterable {
-        ///The version of the vault that's being updated or deleted does not match the version stored in the backed. It is likely that another client updated the vault first so the caller should reconcile the changes before attempting to update or delete the vault.
+        /// The version of the vault that's being updated or deleted does not match the version stored in the backed. It is likely that another client updated the vault first so the caller should reconcile the changes before attempting to update or delete the vault.
         case versionMismatch
 
         /// The user is not authorized to perform the requested operation. This maybe due to specifying the wrong key deriving key or password.
         case notAuthorized
 
-        ///The vault data retrieved is invalid. This indicates the vault is corrupt or is encrypted using a key that's not known to the client.
+        /// The vault data retrieved is invalid. This indicates the vault is corrupt or is encrypted using a key that's not known to the client.
         case invalidVault
 
         /// The vault is locked and must be unlocked before this action will succeed.

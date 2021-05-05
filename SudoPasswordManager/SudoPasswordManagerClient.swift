@@ -134,11 +134,11 @@ public protocol SudoPasswordManagerClient: class {
     /// - Returns: A Rescue Kit PDF with the secret code.
     func renderRescueKit(templatePDF: PDFDocument) -> PDFDocument?
 
-    //Fetches the list of [Entitlement] that indicates the resources the user is entitled to use.
-    // - Parameter completion: handler called when fetching the entitlements succeeds or fails.
+    /// Fetches the list of [Entitlement] that indicates the resources the user is entitled to use.
+    /// - Parameter completion: handler called when fetching the entitlements succeeds or fails.
     func getEntitlement(completion: @escaping (Result<[Entitlement], Error>) -> Void)
 
-    // Fetches the current [EntitlementState] which includes information about how many entitlements have been consumed.
+    /// Fetches the current [EntitlementState] which includes information about how many entitlements have been consumed.
     /// - Parameter completion: Completion handler when fetching the current entitlement state succeeds or fails. An empty list indicates no entitlements have been consumed.
     func getEntitlementState(completion: @escaping (Result<[EntitlementState], Error>) -> Void)
 }
