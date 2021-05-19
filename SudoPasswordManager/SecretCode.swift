@@ -30,7 +30,8 @@ func formatSecretCode(string: String) -> String? {
 }
 
 func parseSecretCode(string: String) -> Data? {
-    let hexstring = string.replacingOccurrences(of: "-", with: "")
+    let dashlessCode = string.replacingOccurrences(of: "-", with: "")
+    let hexstring = dashlessCode.components(separatedBy: .whitespaces).joined()
     // Secret code is the last 32 digits of the code passed in.  We append (e.g. hash of user id) metadata to the front of the
     // secret code for support purposes.
     return Data(hexdecimalString: String(hexstring.suffix(32)))
