@@ -28,7 +28,7 @@ class RescueKitSecretCodePage: PDFPage {
             NSAttributedString.Key.font: font
         ]
         let stringSize = string.size(withAttributes: attributes)
-        string.draw(at: CGPoint(x: (pageBounds.size.width - stringSize.width) / 2, y: (pageBounds.size.height - (pageBounds.size.height / 4.75))), withAttributes: attributes)
+        string.draw(at: CGPoint(x: (pageBounds.size.width - stringSize.width) / 2, y: (pageBounds.size.height - (pageBounds.size.height / 4.6))), withAttributes: attributes)
         
         context.restoreGState()
         UIGraphicsPopContext()

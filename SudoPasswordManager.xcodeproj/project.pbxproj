@@ -36,7 +36,6 @@
 		32883056250FC73700ECB31E /* SecretCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32883055250FC73700ECB31E /* SecretCode.swift */; };
 		32924B47255327760009F82D /* PasswordManagerKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32924B46255327760009F82D /* PasswordManagerKeyManager.swift */; };
 		32924B4C255329770009F82D /* VaultFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32924B4B255329770009F82D /* VaultFactory.swift */; };
-		329A83F9255DBDEF00C408A2 /* RescueKit.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 329A83F8255DBDEF00C408A2 /* RescueKit.pdf */; };
 		32C04EA624F43CB800B2269F /* PasswordManagerClientErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C04EA524F43CB800B2269F /* PasswordManagerClientErrorTests.swift */; };
 		32C04EA824F57D5900B2269F /* PasswordManagerClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C04EA724F57D5900B2269F /* PasswordManagerClientTests.swift */; };
 		32C04EAD24F58BA800B2269F /* awaitResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C04EAC24F58BA800B2269F /* awaitResult.swift */; };
@@ -47,6 +46,7 @@
 		32C04EBA24FAB05600B2269F /* VaultStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C04EB924FAB05600B2269F /* VaultStore.swift */; };
 		32C04EBE24FC4A2A00B2269F /* VaultSchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C04EBD24FC4A2A00B2269F /* VaultSchemaV1.swift */; };
 		4EB7955A7E7BC304FD3F7720 /* Pods_SudoPasswordManager.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D00C678DDBFFBF9C667FDB43 /* Pods_SudoPasswordManager.framework */; };
+		C39608432680D6C70058C153 /* RescueKit.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C39608422680D6C70058C153 /* RescueKit.pdf */; };
 		C3BFF11424DD937400D870FC /* SudoPasswordManager.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3BFF10A24DD937300D870FC /* SudoPasswordManager.framework */; };
 		C3BFF11924DD937400D870FC /* PasswordGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3BFF11824DD937400D870FC /* PasswordGeneratorTests.swift */; };
 		C3BFF11B24DD937400D870FC /* SudoPasswordManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3BFF10D24DD937300D870FC /* SudoPasswordManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -113,7 +113,6 @@
 		32883055250FC73700ECB31E /* SecretCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretCode.swift; sourceTree = "<group>"; };
 		32924B46255327760009F82D /* PasswordManagerKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerKeyManager.swift; sourceTree = "<group>"; };
 		32924B4B255329770009F82D /* VaultFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultFactory.swift; sourceTree = "<group>"; };
-		329A83F8255DBDEF00C408A2 /* RescueKit.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = RescueKit.pdf; sourceTree = "<group>"; };
 		32C04EA524F43CB800B2269F /* PasswordManagerClientErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerClientErrorTests.swift; sourceTree = "<group>"; };
 		32C04EA724F57D5900B2269F /* PasswordManagerClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerClientTests.swift; sourceTree = "<group>"; };
 		32C04EAC24F58BA800B2269F /* awaitResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = awaitResult.swift; sourceTree = "<group>"; };
@@ -126,6 +125,7 @@
 		36F4A2885A7B249608EB2DAB /* Pods-SudoPasswordManager.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SudoPasswordManager.debug.xcconfig"; path = "Target Support Files/Pods-SudoPasswordManager/Pods-SudoPasswordManager.debug.xcconfig"; sourceTree = "<group>"; };
 		72140BD38972F3B8B2CBDED1 /* Pods-SudoPasswordManager-SudoPasswordManagerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SudoPasswordManager-SudoPasswordManagerTests.release.xcconfig"; path = "Target Support Files/Pods-SudoPasswordManager-SudoPasswordManagerTests/Pods-SudoPasswordManager-SudoPasswordManagerTests.release.xcconfig"; sourceTree = "<group>"; };
 		87FFC6195798E5219E64A014 /* Pods_SudoPasswordManager_SudoPasswordManagerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SudoPasswordManager_SudoPasswordManagerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C39608422680D6C70058C153 /* RescueKit.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = RescueKit.pdf; sourceTree = "<group>"; };
 		C3BFF10A24DD937300D870FC /* SudoPasswordManager.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SudoPasswordManager.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3BFF10D24DD937300D870FC /* SudoPasswordManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SudoPasswordManager.h; sourceTree = "<group>"; };
 		C3BFF10E24DD937300D870FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -332,7 +332,7 @@
 		CE7B3A9E251AA3B200B2622B /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				329A83F8255DBDEF00C408A2 /* RescueKit.pdf */,
+				C39608422680D6C70058C153 /* RescueKit.pdf */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -475,7 +475,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				329A83F9255DBDEF00C408A2 /* RescueKit.pdf in Resources */,
+				C39608432680D6C70058C153 /* RescueKit.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
